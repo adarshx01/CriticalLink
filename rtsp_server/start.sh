@@ -1,3 +1,3 @@
 #!/bin/bash
-./mediamtx
+./mediamtx 
 # change configuration file for authentication and other customization
