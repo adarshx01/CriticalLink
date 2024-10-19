@@ -1,0 +1,9 @@
+admission_id :
+admission_type : { live , not live }
+Patient_id :
+Nurse_id :
+doctor_id :
+ward_assigned :
+bed_assigned :
+
+
