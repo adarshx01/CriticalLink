@@ -1,0 +1,19 @@
+data types : PII images reports prescription
+    PII :
+        { type text }
+        Patient_id :
+        Name :
+        Phone :
+        Address : 
+        Age :
+        Gender :
+    Images :
+        { type file}
+        xray_images, MRI images etc
+    Reports :
+        { type file }
+        pdf files
+    Prescription:
+        { type file}
+        text file
+
