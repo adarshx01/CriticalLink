@@ -16,6 +16,7 @@ frame = cv2.imread(image_path)
 @app.get("/emotions")
 def predictions():
     # Convert frame to grayscale
+
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Convert grayscale frame to RGB format
