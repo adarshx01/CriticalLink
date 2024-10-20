@@ -1,11 +1,11 @@
+import cv2
+import os
+from deepface import DeepFace
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 from typing import List
 import numpy as np
-import joblib
-from sklearn.metrics import mean_absolute_error
-filename="model.joblib"
-clf = joblib.load('model.joblib')
 app = FastAPI()
 
 # Load the CSV file into a pandas DataFrame and convert to a matrix of floats
@@ -35,13 +35,20 @@ async def read_ecg():
     except StopIteration:
         raise HTTPException(status_code=404, detail="No more ECG rows available.")
 
-@app.get("/anomaly")
-async def isanomaly():
-    row = next(generator)
-    if row is None:
-        return {None}
-    row = np.array(row)
-    result = loaded_model.score(X_test, Y_test)
-    print(result)
+rtsp_url = "rtsp://172.16.1.41:8554/mystream"
+app = FastAPI()
+@app.get("/emotions")
+async def predictions():
+    cap = cv2.VideoCapture(rtsp_url)
+    if not cap.isOpened():
+        return {}    
+    ret, frame = cap.read()
+    cap.release()
+    # gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
+    result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
     return result
 
+if __name__ == "__main__" :
+    import uvicorn
+    uvicorn.run(app,host="0.0.0.0",port=4000) 
