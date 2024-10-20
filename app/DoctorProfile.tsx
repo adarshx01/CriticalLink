@@ -2,10 +2,122 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, FlatList, Modal, Image, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { db } from './firebaseConfig';
 
 const { width } = Dimensions.get('window');
 
 // Mock data for doctor and patients
+const fetchDoctorData = async (doctorId) => {
+  try {
+    const doctorDoc = await db.collection('doctors').doc(doctorId).get();
+
+    if (doctorDoc.exists) {
+      const doctorData = {
+        id: doctorDoc.id,
+        ...doctorDoc.data(),
+      };
+
+      // Fetch patients associated with this doctor
+      const patientsSnapshot = await db
+        .collection('doctors')
+        .doc(doctorId)
+        .collection('patients')
+        .get();
+
+      const patientsData = {};
+
+      patientsSnapshot.forEach((patientDoc) => {
+        const patientId = patientDoc.id;
+        patientsData[patientId] = {
+          id: patientId,
+          ...patientDoc.data(),
+        };
+
+        // Fetch additional data for each patient
+        fetchPatientDetails(doctorId, patientId, patientsData);
+      });
+
+      return { doctorData, patientsData };
+    } else {
+      console.log('No such doctor!');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching doctor data:', error);
+  }
+};
+
+const fetchPatientDetails = async (doctorId, patientId, patientsData) => {
+  try {
+    const patientDoc = await db
+      .collection('doctors')
+      .doc(doctorId)
+      .collection('patients')
+      .doc(patientId)
+      .get();
+
+    if (patientDoc.exists) {
+      const patientData = patientDoc.data();
+
+      // Fetch medications, lab reports, vitals, and nurse notes as needed
+      patientsData[patientId].medications = await fetchMedications(doctorId, patientId);
+      patientsData[patientId].labReports = await fetchLabReports(doctorId, patientId);
+      patientsData[patientId].vitals = await fetchVitals(doctorId, patientId);
+      patientsData[patientId].nurseNotes = await fetchNurseNotes(doctorId, patientId);
+    }
+  } catch (error) {
+    console.error('Error fetching patient details:', error);
+  }
+};
+
+const fetchMedications = async (doctorId, patientId) => {
+  const medicationsSnapshot = await db
+    .collection('doctors')
+    .doc(doctorId)
+    .collection('patients')
+    .doc(patientId)
+    .collection('medications')
+    .get();
+
+  return medicationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+const fetchLabReports = async (doctorId, patientId) => {
+  const labReportsSnapshot = await db
+    .collection('doctors')
+    .doc(doctorId)
+    .collection('patients')
+    .doc(patientId)
+    .collection('lab_reports')
+    .get();
+
+  return labReportsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+const fetchVitals = async (doctorId, patientId) => {
+  const vitalsSnapshot = await db
+    .collection('doctors')
+    .doc(doctorId)
+    .collection('patients')
+    .doc(patientId)
+    .collection('vitals')
+    .get();
+
+  return vitalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+const fetchNurseNotes = async (doctorId, patientId) => {
+  const nurseNotesSnapshot = await db
+    .collection('doctors')
+    .doc(doctorId)
+    .collection('patients')
+    .doc(patientId)
+    .collection('nurse_notes')
+    .get();
+
+  return nurseNotesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
 const doctorData = {
   id: 'D001',
   name: 'Dr. Jane Smith',
@@ -73,7 +185,7 @@ export default function DoctorProfile() {
     if (selectedPatient && activeTab === 'analysis') {
       const fetchEcgData = async () => {
         try {
-          const response = await fetch('https://kmvzxczv-8000.inc1.devtunnels.ms/ecg');
+          const response = await fetch('http://172.16.1.41:3001/ecg');
           const data = await response.json();
           if (Array.isArray(data) && data.length === 140) {
             setEcgData(data);

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import DoctorProfile from './DoctorProfile';
 import MedicineScreen from './MedicineScreen';
+import LandinPage from './LandingPage';
 // Placeholder components for other tabs
 const HomeScreen = () => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Home Screen</Text></View>;
 const DoctorsScreen = () => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Doctors Screen</Text></View>;
@@ -367,8 +368,8 @@ export default function App() {
  
       <Tab.Navigator>
         <Tab.Screen 
-          name="Home" 
-          component={HomeScreen} 
+          name="LandinPage" 
+          component={LandinPage} 
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home" color={color} size={size} />
@@ -393,7 +394,7 @@ export default function App() {
             ),
           }}
         />
-<Tab.Screen 
+        <Tab.Screen 
           name="Doctor" 
           component={DoctorProfile}
           options={{
