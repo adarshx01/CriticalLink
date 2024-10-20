@@ -1,7 +1,11 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 from typing import List
-
+import numpy as np
+import joblib
+from sklearn.metrics import mean_absolute_error
+filename="model.joblib"
+clf = joblib.load('model.joblib')
 app = FastAPI()
 
 # Load the CSV file into a pandas DataFrame and convert to a matrix of floats
@@ -13,8 +17,8 @@ except Exception as e:
 
 def ecg_row_generator():
     """Generator function to yield ECG rows one by one."""
-    for row in ecg_matrix:
-        yield row.tolist()
+    for row_d in ecg_matrix:
+        yield row_d.tolist()
 
 # Create a generator instance
 generator = ecg_row_generator()
@@ -31,7 +35,13 @@ async def read_ecg():
     except StopIteration:
         raise HTTPException(status_code=404, detail="No more ECG rows available.")
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the ECG API. Use /ecg to get the next ECG row."}
+@app.get("/anomaly")
+async def isanomaly():
+    row = next(generator)
+    if row is None:
+        return {None}
+    row = np.array(row)
+    result = loaded_model.score(X_test, Y_test)
+    print(result)
+    return result
 
