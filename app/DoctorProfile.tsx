@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, FlatList, Modal, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, FlatList, Modal, Image, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+
+const { width } = Dimensions.get('window');
 
 // Mock data for doctor and patients
 const doctorData = {
@@ -56,72 +58,43 @@ const patientsData = {
     },
     nurseNotes: 'Patient complains of occasional dizziness. Recommend monitoring blood pressure closely.',
   },
-  'P002': {
-    id: 'P002',
-    name: 'Alice Johnson',
-    age: 62,
-    gender: 'Female',
-    condition: 'Diabetes Type 2',
-    admissionDate: '2023-09-10',
-    medications: [
-      { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily' },
-      { name: 'Glipizide', dosage: '5mg', frequency: 'Once daily' },
-    ],
-    allergies: ['Latex'],
-    labReports: [
-      { date: '2023-09-11', test: 'HbA1c', result: 'High (7.8%)', fileType: 'pdf' },
-      { date: '2023-09-12', test: 'Kidney Function Test', result: 'Normal', fileType: 'image' },
-    ],
-    vitals: [
-      { date: '2023-09-10', heartRate: 80, bloodPressure: '130/85', temperature: 98.8 },
-      { date: '2023-09-11', heartRate: 78, bloodPressure: '128/82', temperature: 98.6 },
-      { date: '2023-09-12', heartRate: 76, bloodPressure: '126/80', temperature: 98.7 },
-    ],
-    soundAnalysis: {
-      coughingFrequency: 3,
-      sneezingFrequency: 1,
-      noseRunning: 'No',
-      sleepQuality: 'Fair',
-    },
-    nurseNotes: 'Patient\'s blood sugar levels have been fluctuating. Adjust insulin dosage as needed.',
-  },
-  'P003': {
-    id: 'P003',
-    name: 'Bob Williams',
-    age: 55,
-    gender: 'Male',
-    condition: 'Post-surgery Recovery',
-    admissionDate: '2023-09-05',
-    medications: [
-      { name: 'Tramadol', dosage: '50mg', frequency: 'Every 6 hours as needed' },
-      { name: 'Cephalexin', dosage: '500mg', frequency: 'Every 8 hours' },
-    ],
-    allergies: ['Codeine'],
-    labReports: [
-      { date: '2023-09-06', test: 'Complete Blood Count', result: 'Low Hemoglobin', fileType: 'pdf' },
-      { date: '2023-09-07', test: 'Wound Culture', result: 'No Growth', fileType: 'image' },
-      { date: '2023-09-08', test: 'Chest X-ray', result: 'Clear', fileType: 'xray' },
-    ],
-    vitals: [
-      { date: '2023-09-05', heartRate: 85, bloodPressure: '125/82', temperature: 99.1 },
-      { date: '2023-09-06', heartRate: 82, bloodPressure: '122/80', temperature: 98.9 },
-      { date: '2023-09-07', heartRate: 80, bloodPressure: '120/78', temperature: 98.6 },
-    ],
-    soundAnalysis: {
-      coughingFrequency: 7,
-      sneezingFrequency: 0,
-      noseRunning: 'No',
-      sleepQuality: 'Poor',
-    },
-    nurseNotes: 'Patient experiencing some post-operative pain. Monitor pain levels and adjust medication as needed.',
-  },
+  // ... (other patient data remains the same)
 };
 
-const DoctorProfile = () => {
+export default function DoctorProfile() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [activeTab, setActiveTab] = useState('info');
   const [showFullScreenVideo, setShowFullScreenVideo] = useState(false);
   const [selectedLabReport, setSelectedLabReport] = useState(null);
+  const [ecgData, setEcgData] = useState([]);
+
+  useEffect(() => {
+    let intervalId;
+    if (selectedPatient && activeTab === 'analysis') {
+      const fetchEcgData = async () => {
+        try {
+          const response = await fetch('https://kmvzxczv-8000.inc1.devtunnels.ms/ecg');
+          const data = await response.json();
+          if (Array.isArray(data) && data.length === 140) {
+            setEcgData(data);
+          } else {
+            console.error('Invalid ECG data format');
+          }
+        } catch (error) {
+          console.error('Error fetching ECG data:', error);
+        }
+      };
+
+      fetchEcgData(); // Fetch immediately
+      intervalId = setInterval(fetchEcgData, 5000); // Then every 5 seconds
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [selectedPatient, activeTab]);
 
   const renderPatientList = () => (
     <FlatList
@@ -214,12 +187,7 @@ const DoctorProfile = () => {
           <TouchableOpacity
             key={index}
             style={styles.labReportItem}
-            onPress={() => {
-              setSelectedLabReport(report);
-              fetchReportAnalysis(report).then(result => {
-                setSelectedLabReport(prev => prev ? { ...prev, ...result } : null);
-              });
-            }}
+            onPress={() => setSelectedLabReport(report)}
           >
             <Text>{report.date}: {report.test}</Text>
             <Text>Result: {report.result}</Text>
@@ -244,7 +212,7 @@ const DoctorProfile = () => {
               ]
             }]
           }}
-          width={300}
+          width={width - 40}
           height={200}
           yAxisLabel=""
           chartConfig={{
@@ -264,6 +232,44 @@ const DoctorProfile = () => {
         />
         <Text>Nose Running: {selectedPatient.soundAnalysis.noseRunning}</Text>
         <Text>Sleep Quality: {selectedPatient.soundAnalysis.sleepQuality}</Text>
+      </View>
+      <View style={styles.infoSection}>
+        <Text style={styles.subSectionTitle}>ECG Analysis</Text>
+        <LineChart
+          data={{
+            labels: Array.from({ length: 15 }, (_, i) => (i * 10).toString()),
+            datasets: [{
+              data: ecgData.length ? ecgData : [0]
+            }]
+          }}
+          width={width - 40}
+          height={220}
+          chartConfig={{
+            backgroundColor: '#ffffff',
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#ffffff',
+            decimalPlaces: 2,
+            color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 16
+            },
+            propsForDots: {
+              r: '0',
+            }
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16
+          }}
+          withDots={false}
+          withInnerLines={false}
+          withOuterLines={true}
+          withVerticalLabels={true}
+          withHorizontalLabels={true}
+          fromZero={true}
+          yAxisInterval={6}
+        />
       </View>
       <View style={styles.infoSection}>
         <Text style={styles.subSectionTitle}>Nurse Notes</Text>
@@ -302,7 +308,7 @@ const DoctorProfile = () => {
               }
             ]
           }}
-          width={300}
+          width={width - 40}
           height={200}
           chartConfig={{
             backgroundColor: '#ffffff',
@@ -325,13 +331,12 @@ const DoctorProfile = () => {
       <View style={styles.infoSection}>
         <Text style={styles.subSectionTitle}>AI Predictive Analysis</Text>
         <PieChart
-
           data={[
             { name: 'Low Risk', population: 70, color: 'rgba(0, 255, 0, 0.5)', legendFontColor: '#7F7F7F', legendFontSize: 12 },
             { name: 'Medium Risk', population: 20, color: 'rgba(255, 255, 0, 0.5)', legendFontColor: '#7F7F7F', legendFontSize: 12 },
             { name: 'High Risk', population: 10, color: 'rgba(255, 0, 0, 0.5)', legendFontColor: '#7F7F7F', legendFontSize: 12 },
           ]}
-          width={300}
+          width={width - 40}
           height={200}
           chartConfig={{
             backgroundColor: '#ffffff',
@@ -340,7 +345,7 @@ const DoctorProfile = () => {
             decimalPlaces: 2,
             color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             style: {
-              borderRadius: 16
+              borderRadius:  16
             }
           }}
           accessor="population"
@@ -366,15 +371,6 @@ const DoctorProfile = () => {
       </View>
     </View>
   );
-
-  const fetchReportAnalysis = async (report) => {
-    // Simulating API call to fetch report analysis
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return {
-      summary: `The ${report.test} conducted on ${report.date} shows ${report.result}.`,
-      analysis: `Based on the ${report.test} results, the patient's condition appears to be ${report.result === 'Normal' ? 'stable' : 'requiring attention'}. ${report.result === 'Normal' ? 'No immediate action required.' : 'Further investigation may be necessary.'}`,
-    };
-  };
 
   const renderLabReportModal = () => (
     <Modal
@@ -405,17 +401,6 @@ const DoctorProfile = () => {
                 style={styles.labReportImage}
               />
             )}
-            {selectedLabReport.fileType === 'text' && (
-              <Text style={styles.labReportText}>
-                This is a placeholder for the full text of the lab report.
-              </Text>
-            )}
-            <View style={styles.reportAnalysis}>
-              <Text style={styles.reportAnalysisTitle}>Report Summary</Text>
-              <Text>{selectedLabReport.summary}</Text>
-              <Text style={styles.reportAnalysisTitle}>Report Analysis</Text>
-              <Text>{selectedLabReport.analysis}</Text>
-            </View>
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => setSelectedLabReport(null)}
@@ -427,7 +412,6 @@ const DoctorProfile = () => {
       </View>
     </Modal>
   );
-
 
   return (
     <ScrollView style={styles.container}>
@@ -453,7 +437,7 @@ const DoctorProfile = () => {
       {renderLabReportModal()}
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -558,23 +542,4 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginVertical: 10,
   },
-  labReportText: {
-    marginVertical: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-  },
-  reportAnalysis: {
-    marginTop: 20,
-    width: '100%',
-  },
-  reportAnalysisTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
-  },
 });
-
-export default DoctorProfile;

@@ -272,9 +272,15 @@ const PatientLiveView = ({ route }) => {
       
       <View style={styles.liveView}>
         <Text style={styles.sectionTitle}>Live View</Text>
-        <View style={styles.liveViewPlaceholder}>
-          <Text>Live Video Feed Placeholder</Text>
-        </View>
+        {/* <View style={styles.liveViewPlaceholder}> */}
+        <Video
+          source={{ uri: 'http://127.0.0.1:5000/video_feedy' }}
+          style={styles.video}
+          resizeMode="cover"
+          repeat={true}
+          onError={(error) => console.error('Video Error:', error)}
+        />
+      {/* </View> */}
       </View>
       
       <View style={styles.tabContainer}>
@@ -472,6 +478,9 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: '#007AFF',
+  },
+  video: {
+    flex: 1,
   },
   chartContainer: {
     alignItems: 'center',

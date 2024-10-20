@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   recommendationItem: {
-    padding: 10,
+    padding: 10,  
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
     marginRight: 10,
