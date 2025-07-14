@@ -1,8 +1,32 @@
+
+
+---
+
+# ICU Monitoring System(step down icu system for realtime analysis and monitoring)
+
+Hosted Link had some linting issue (http://criticallink.vercel.app/) (http://criticallink.co/)      (https://drive.google.com/file/d/1ILCLUyDT1CJ6zZyATbyxuIG7OVCBN9Z6/view?usp=sharing)
+This project is a real-time ICU monitoring system, designed to enhance patient care by integrating multiple health data sources, advanced AI-powered monitoring, giving prediction based patients face emotions,body movement alerts, fall detection, Cough and sneeze detector, and remote access capabilities for healthcare teams.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
 
-First, run the development server:
+## Features
+
+- **Real-Time Data Integration**: Collects data from multiple medical devices.
+- **AI-Based Monitoring**: Uses cameras and object detection to track patient activity.
+- **Remote Access**: Mobile app for healthcare providers to monitor and make decisions remotely.
+- **Alert System**: Instant notifications for abnormal readings or critical changes.
+- **Trend Analysis**: Analyze historical data for tailored treatment plans.
+- **Enhanced Communication**: Seamless interaction between healthcare teams and patient families.
+- - **Enhanced Realtime alerting Mobile APP**: Seamless interaction between web and Android, sensor data transfer.
+
+## Getting Started
+extract and run server and medbit zip files in for server
+Explore the project branches for additional configurations:
+- **Server** branch: Contains backend configurations.
+- **ML_config** branch: Houses machine learning configurations.
+
+To start the development server:
 
 ```bash
 npm run dev
@@ -14,23 +38,26 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then, open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the app by modifying `app/page.tsx`, with automatic updates on save.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to optimize and load [Geist](https://vercel.com/font) by Vercel.
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+For more on Next.js, visit:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Interactive Tutorial](https://nextjs.org/learn)
+- [Next.js GitHub Repository](https://github.com/vercel/next.js)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploying
 
-## Deploy on Vercel
+To deploy your app, use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For additional deployment information, see the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+This README should help new users get started with development, deployment, and learning more about Next.js.
